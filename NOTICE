@@ -1,0 +1,9 @@
+PeakShift
+Copyright (c) 2026 PeakShift contributors
+
+The PeakShift source code is licensed under the MIT License (see LICENSE).
+
+Third-party notice: AG Studio (ag-studio, ag-studio-react) and AG Grid Enterprise are
+commercial products by AG Grid Ltd, used under AG Grid Ltd's licence terms. They are
+not covered by the MIT License. See https://www.ag-grid.com/studio/license-pricing/.
+Other dependencies are used under their own open-source licences (see package-lock.json).
