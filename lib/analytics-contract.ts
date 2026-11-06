@@ -8,6 +8,7 @@ import { hashOf } from "./store";
 import { latestProfile } from "./services";
 import { scenarioNow } from "./clock";
 import { attainmentPct } from "./terms";
+import { buildParticipantEfficiency } from "./efficiency";
 
 export const ANALYTICS_SCHEMA_VERSION = "1.0";
 export const MAX_ROWS_PER_SOURCE = 5000;
@@ -233,6 +234,9 @@ export function buildStudioData(s: AppState, ev: DemandEvent): StudioBootstrap {
     lastReconciledAt: batch!.lastCheckedAt,
   }));
 
+  // ---- participant efficiency (derived projection: confirmed PayPal item payouts ÷ verified energy)
+  const participantEfficiency = buildParticipantEfficiency(ev.id, payoutItems, verificationResults, (id) => participants.find((o) => o.id === id)?.name ?? id);
+
   const src = (id: string, name: string, description: string, primaryKeyField: string, data: StudioSource["data"], fields: FieldDef[]): StudioSource => ({
     id,
     name,
@@ -295,6 +299,23 @@ export function buildStudioData(s: AppState, ev: DemandEvent): StudioBootstrap {
       f("payoutStatus", "Payout status", "textFormat"), f("batchStatus", "Batch status", "textFormat"), f("failureCode", "Failure code", "textFormat"), f("provider", "Provider", "textFormat"),
       f("lastWebhookAt", "Last webhook (UTC)", "textFormat"), f("lastReconciledAt", "Last reconciled (UTC)", "textFormat"),
     ]),
+    src(
+      "participantEfficiency",
+      "Participant efficiency",
+      "Derived, read-only projection: one row per business whose PayPal payout ITEM is confirmed SUCCEEDED and whose verified shifted energy is positive. costPerVerifiedKwhUsd = paidAmountUsd ÷ verifiedEnergyKwh. eventWeightedAverageCostPerVerifiedKwhUsd = total confirmed paid USD ÷ total verified kWh (same value on every row; not a mean of the rates). Batch status is never used. Use this table directly for cost-per-verified-kWh charts — no calculated measure needed.",
+      "participantEfficiencyId",
+      participantEfficiency,
+      [
+        f("participantEfficiencyId", "Participant efficiency ID", "textFormat"), f("eventId", "Event ID", "textFormat"), f("businessId", "Business ID", "textFormat"), f("businessName", "Business", "textFormat"),
+        f("paidAmountMinor", "Paid amount (minor)", "integerFormat", "Confirmed PayPal item payouts in cents (item status SUCCEEDED)"),
+        f("paidAmountUsd", "Paid amount (USD)", "decimalFormat", "paidAmountMinor ÷ 100"),
+        f("verifiedEnergyWh", "Verified energy (Wh)", "integerFormat", "Verified shifted energy from the verification run"),
+        f("verifiedEnergyKwh", "Verified energy (kWh)", "decimalFormat", "verifiedEnergyWh ÷ 1000"),
+        f("costPerVerifiedKwhUsd", "Cost per verified kWh (USD)", "decimalFormat", "paidAmountUsd ÷ verifiedEnergyKwh — USD per verified kWh"),
+        f("eventWeightedAverageCostPerVerifiedKwhUsd", "Event weighted avg cost per verified kWh (USD)", "decimalFormat", "Total confirmed paid USD ÷ total verified kWh for the event"),
+        f("payoutStatus", "Payout status", "textFormat", "Always SUCCEEDED — only confirmed recipient items are included"),
+      ],
+    ),
   ];
 
   const rel = (id: string, source: string, target: string): StudioRelationship => ({ id, source, target, type: "many-to-one" });
@@ -311,6 +332,8 @@ export function buildStudioData(s: AppState, ev: DemandEvent): StudioBootstrap {
     rel("settlement-business", "settlementItems.businessId", "businesses.businessId"),
     rel("payout-settlement-item", "payoutItems.settlementItemId", "settlementItems.settlementItemId"),
     rel("payout-business", "payoutItems.businessId", "businesses.businessId"),
+    rel("efficiency-event", "participantEfficiency.eventId", "events.eventId"),
+    rel("efficiency-business", "participantEfficiency.businessId", "businesses.businessId"),
   ];
 
   const snapshotId = `snap_${ev.id}_${hashOf({ st: ev.status, o: offerRows.map((o) => [o.offerId, o.offerStatus]), r: run?.id, b: batch?.items.map((i) => i.status), f: ev.funding.status, p: plan?.id })}`;

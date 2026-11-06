@@ -8,7 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx --test tests/domain.test.ts tests/intelligence.test.ts tests/quality.test.ts",
+    "test": "tsx --test tests/domain.test.ts tests/intelligence.test.ts tests/quality.test.ts tests/efficiency.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
   },

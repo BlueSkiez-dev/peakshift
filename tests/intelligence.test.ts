@@ -32,12 +32,12 @@ async function runFullEvent() {
   return E;
 }
 
-test("studio bootstrap: 8 related camelCase sources, snapshot metadata, no PII", async () => {
+test("studio bootstrap: 9 related camelCase sources, snapshot metadata, no PII", async () => {
   const E = await runFullEvent();
   const s = store.read();
   const b = buildStudioData(s, s.events.find((e) => e.id === E)!);
-  assert.deepEqual(b.sources.map((x) => x.id), ["events", "businesses", "eligibility", "offers", "meterIntervals", "verificationResults", "settlementItems", "payoutItems"]);
-  assert.equal(b.relationships.length, 12);
+  assert.deepEqual(b.sources.map((x) => x.id), ["events", "businesses", "eligibility", "offers", "meterIntervals", "verificationResults", "settlementItems", "payoutItems", "participantEfficiency"]);
+  assert.equal(b.relationships.length, 14);
   assert.equal(b.dataMode, "SIMULATED");
   assert.match(b.snapshotId, /^snap_evt_wed_peak_/);
   for (const src of b.sources) {

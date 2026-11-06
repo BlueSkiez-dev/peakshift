@@ -120,12 +120,13 @@ The optimiser, verification and reward calculation are deterministic TypeScript,
 `/operator/intelligence` embeds **AG Studio 3.1.0** (`ag-studio-react`) as a read-only analytics layer, alongside **AG Grid** and **AG Charts** across the app. Operations and money movement stay in their controlled screens.
 
 **Data contract** (`lib/analytics-contract.ts`, `GET /api/v1/analytics/events/:id/studio-data`)
-- Eight event-scoped, camelCase tables, each with a stable `primaryKeyField`: `events`, `businesses`, `eligibility`, `offers`, `meterIntervals`, `verificationResults`, `settlementItems` and `payoutItems`.
-- Twelve explicit many-to-one relationships, so a single widget can query across tables and cross-filtering stays linked.
+- Nine event-scoped, camelCase tables, each with a stable `primaryKeyField`: `events`, `businesses`, `eligibility`, `offers`, `meterIntervals`, `verificationResults`, `settlementItems`, `payoutItems` and the derived `participantEfficiency` projection.
+- `participantEfficiency` (`lib/efficiency.ts`) is read-only: one row per business whose PayPal payout **item** is confirmed `SUCCEEDED` and whose verified energy is positive, with `costPerVerifiedKwhUsd` (paid USD ÷ verified kWh) and `eventWeightedAverageCostPerVerifiedKwhUsd` (total paid ÷ total verified kWh — never a mean of rates) precomputed, so charts need no calculated measures. Demo result: $0.40 / $0.50 / $0.60 per kWh, weighted average $0.5041.
+- Fourteen explicit many-to-one relationships, so a single widget can query across tables and cross-filtering stays linked.
 - Energy is integer **Wh**, power is **kW**, money is integer **minor units** plus `currencyCode`, timestamps are UTC ISO.
 - Every response carries `snapshotId`, `dataAsOfUtc`, `dataMode: SIMULATED` and `schemaVersion`. No emails, PayPal recipient identifiers, secrets or free-text profiles are included.
 
-**Four PeakShift custom widgets** (`components/intelligence/widgets.tsx`, registered with `createWidgets` under a *PeakShift* menu)
+**Five PeakShift custom widgets** (`components/intelligence/widgets.tsx`, registered with `createWidgets` under a *PeakShift* menu)
 
 | Widget ID | Answers |
 |---|---|
@@ -133,6 +134,7 @@ The optimiser, verification and reward calculation are deterministic TypeScript,
 | `peakshift-load-shift-evidence` | Baseline vs actual interval energy, shaded peak and alternate windows, peak reduction, alternate-window increase, cumulative shift, and a Wh/kW toggle |
 | `peakshift-participant-contribution` | Ranked verified energy with a commitment marker and attainment %. Click to cross-filter; unverified businesses are grouped separately |
 | `peakshift-settlement-pulse` | Submitted, paid, in-flight and exception amounts by PayPal **item** status, plus the last webhook time |
+| `peakshift-unit-cost` | USD paid per verified kWh by business: horizontal bars sorted lowest first, two-decimal labels, payout/energy/unit-cost tooltip and a dashed reference line at the event's weighted average |
 
 Each widget has typed data mappings (roles, cardinality, `aiDescription`), a configuration form, `defaultSize`/`minSize` and `ai` metadata, and handles loading, incomplete-mapping, no-data and simulated states. Data comes from the widget data handle, so cross-filter and data changes arrive live.
 
@@ -156,7 +158,7 @@ Requires **Node 20+** (tested on Node 24).
 npm install
 cp .env.example .env.local   # optional: add PayPal sandbox + Anthropic keys
 npm run dev                  # http://localhost:3000 → /demo
-npm test                     # 24 tests: domain, Energy Intelligence, chronology & reconciliation
+npm test                     # 31 tests: domain, Energy Intelligence, chronology, reconciliation, unit cost
 npm run lint                 # ESLint (next/core-web-vitals + typescript)
 ```
 
@@ -223,9 +225,10 @@ lib/
   store.ts               Postgres (row-locked) / file store behind one contract
   ai/                    Claude client, profile extractor, brief parser, analyst, AG Studio proxy
   analytics-contract.ts  event-scoped AG Studio data sources + relationships
+  efficiency.ts          participantEfficiency projection (paid USD per verified kWh, weighted average)
   status.ts, terms.ts    one shared status and metric vocabulary used by every screen
 components/              design system, charts (AG Charts), grids (AG Grid), AG Studio workspace
-tests/                   domain, Energy Intelligence, chronology & reconciliation (24 tests)
+tests/                   domain, Energy Intelligence, chronology, reconciliation, unit cost (31 tests)
 ```
 
 Money is integer cents and energy is integer Wh throughout. Rewards are recalculated on the server at approval and checked against a review hash, so browser totals are never trusted.

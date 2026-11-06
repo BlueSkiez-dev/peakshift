@@ -25,7 +25,7 @@ PeakShift lets a grid or programme operator turn many small businesses' flexibil
 4. **Offers:** businesses accept or decline on their own phones. Committing is voluntary.
 5. **Verify:** 15-minute meter data (simulated and labelled) is compared with a baseline. *Verified shifted energy = min(peak reduction, alternate-window increase), capped at the commitment*, so nobody is paid for a reduction that never reappeared in the allowed window. In the demo, 16.0 kWh was committed, 14.8 kWh was verified (92.5% delivery) and the 1.2 kWh shortfall is not paid.
 6. **Settle and pay:** the operator reviews amounts calculated on the server, then approves. **PayPal Payouts** sends one batch. PeakShift saves the sender batch ID before calling PayPal, so retries can never pay twice. It then reconciles **each recipient item** through **signature-verified webhooks** and by re-checking with PayPal, and a business counts as *paid* only when PayPal confirms its own item.
-7. **Analyse:** an **AG Studio** "Energy Intelligence" workspace includes four custom PeakShift widgets (flexibility vs target, load-shift evidence, participant contribution, settlement pulse) that filter each other. **PeakShift Analyst**, built on the AG Studio Agent Framework with Claude, answers questions such as *"Why was NorthCool Storage excluded?"* with read-only tools. It can build widgets, but it has **no way to move money**.
+7. **Analyse:** an **AG Studio** "Energy Intelligence" workspace includes five custom PeakShift widgets (flexibility vs target, load-shift evidence, participant contribution, settlement pulse, cost per verified kWh) that filter each other. **PeakShift Analyst**, built on the AG Studio Agent Framework with Claude, answers questions such as *"Why was NorthCool Storage excluded?"* with read-only tools. It can build widgets, but it has **no way to move money**.
 
 ## How we built it
 
@@ -43,7 +43,7 @@ PeakShift lets a grid or programme operator turn many small businesses' flexibil
   - a server proxy for the AG Studio agent loop, with a model allowlist, size and time limits and a tool allowlist;
   - offline rule-based fallbacks when no key is set.
 - **AG Grid / AG Charts / AG Studio:**
-  - 8 related, event-scoped data sources;
+  - 9 related, event-scoped data sources, including a derived cost-per-verified-kWh projection built only from PayPal-confirmed payouts;
   - 4 custom widgets;
   - a versioned default report that opens in View mode;
   - autosave on the server with revision conflict detection;

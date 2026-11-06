@@ -30,7 +30,7 @@ const theme = studioTheme.withParams({
 export const PROMPT_STARTERS = [
   { label: "Committed vs verified", prompt: "Build a chart comparing committed versus verified shifted energy by business for this event." },
   { label: "Why was NorthCool excluded?", prompt: "Why was NorthCool Storage excluded from this dispatch? Show the exact rule and the source record." },
-  { label: "Incentive efficiency", prompt: "Compare incentive cost per verified kWh across participating businesses and highlight the most efficient participants." },
+  { label: "Incentive efficiency", prompt: "Chart the cost per verified kWh for each business, lowest first, with the event's weighted average as a reference line." },
 ];
 
 type SaveState = "saved" | "dirty" | "saving" | "error" | "conflict";
@@ -288,10 +288,12 @@ export default function IntelligenceWorkspace({ bootstrap, report, ai, licenseKe
               [
                 "You are PeakShift Analyst: understand the selected event's data, explain what happened, and help the operator build a useful report.",
                 `Event scope: ${boot.eventId}. Snapshot ${boot.snapshotId} as of ${boot.dataAsOfUtc}. Data mode: SIMULATED.`,
-                "Tables: events, businesses, eligibility, offers, meterIntervals, verificationResults, settlementItems, payoutItems (related by eventId/businessId). Energy in Wh, money in minor units.",
-                "PeakShift custom widgets you can add: peakshift-participant-contribution (committed vs verified by business), peakshift-load-shift-evidence, peakshift-flex-capacity, peakshift-settlement-pulse. Prefer them for those questions.",
+                "Tables: events, businesses, eligibility, offers, meterIntervals, verificationResults, settlementItems, payoutItems, participantEfficiency (related by eventId/businessId). Energy in Wh, money in minor units.",
+                "participantEfficiency is a precomputed projection: one row per business with a confirmed (SUCCEEDED) PayPal payout item and positive verified energy, with costPerVerifiedKwhUsd and eventWeightedAverageCostPerVerifiedKwhUsd already calculated. Use these fields directly; never create a calculated measure or average the per-business rates.",
+                "PeakShift custom widgets you can add: peakshift-participant-contribution (committed vs verified by business), peakshift-load-shift-evidence, peakshift-flex-capacity, peakshift-settlement-pulse, peakshift-unit-cost (cost per verified kWh: horizontal bars sorted lowest first, 2-decimal labels, tooltip, weighted-average reference line). Prefer them for those questions.",
+                "For cost per verified kWh, add peakshift-unit-cost mapped to business=participantEfficiency.businessName, unitCost=participantEfficiency.costPerVerifiedKwhUsd (max), paid=participantEfficiency.paidAmountUsd (sum), energy=participantEfficiency.verifiedEnergyKwh (sum), reference=participantEfficiency.eventWeightedAverageCostPerVerifiedKwhUsd (max).",
                 "Use peakshift_explain_exclusion for exclusion questions and quote the reasonCode, ruleId and sourceRecord.",
-                "Use peakshift_verification_breakdown for reward-per-verified-kWh questions (rewardPerVerifiedKwhMinor is cents per kWh).",
+                "Use peakshift_verification_breakdown for the verification inputs behind a reward (rewardPerVerifiedKwhMinor is the calculated entitlement in cents per kWh); for what was actually paid per verified kWh use participantEfficiency.",
                 "Delegate widget placement to the 'page' agent and detailed widget configuration to the 'widget' agent when helpful.",
                 "Never claim a payout is paid unless its item status is SUCCEEDED. You cannot approve, pay, or change any operational data.",
               ].join("\n"),

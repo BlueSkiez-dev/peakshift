@@ -3,7 +3,7 @@
 // Field references use "<sourceId>.<fieldId>" from lib/analytics-contract.ts.
 
 export const REPORT_TEMPLATE_VERSION = "event-performance-v2";
-export const PEAKSHIFT_WIDGET_IDS = ["peakshift-flex-capacity", "peakshift-load-shift-evidence", "peakshift-participant-contribution", "peakshift-settlement-pulse"] as const;
+export const PEAKSHIFT_WIDGET_IDS = ["peakshift-flex-capacity", "peakshift-load-shift-evidence", "peakshift-participant-contribution", "peakshift-settlement-pulse", "peakshift-unit-cost"] as const;
 
 const r = (id: string, aggregation?: string) => (aggregation ? { id, aggregation } : { id });
 const t = (text: string) => ({ text });

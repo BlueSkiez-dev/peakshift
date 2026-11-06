@@ -55,6 +55,7 @@ export interface CapacityDef { type: "peakshift-flex-capacity"; dataMapping: { t
 export interface EvidenceDef { type: "peakshift-load-shift-evidence"; dataMapping: { interval: Ref; baseline: Ref; actual: Ref; window: Ref }; format?: Fmt }
 export interface ContributionDef { type: "peakshift-participant-contribution"; dataMapping: { participant: Ref; verified: Ref; committed: Ref }; format?: Fmt }
 export interface PulseDef { type: "peakshift-settlement-pulse"; dataMapping: { status: Ref; amount: Ref }; format?: Fmt }
+export interface UnitCostDef { type: "peakshift-unit-cost"; dataMapping: { business: Ref; unitCost: Ref; paid: Ref; energy: Ref; reference: Ref }; format?: Fmt }
 
 export interface PeakShiftRegistry extends AgBaseRegistry {
   widgets: readonly (
@@ -63,6 +64,7 @@ export interface PeakShiftRegistry extends AgBaseRegistry {
     | AgBaseWidgetDefinition<"peakshift-load-shift-evidence", EvidenceDef>
     | AgBaseWidgetDefinition<"peakshift-participant-contribution", ContributionDef>
     | AgBaseWidgetDefinition<"peakshift-settlement-pulse", PulseDef>
+    | AgBaseWidgetDefinition<"peakshift-unit-cost", UnitCostDef>
   )[];
 }
 
@@ -368,6 +370,64 @@ function SettlementPulse(params: AgWidgetParams<PulseDef>) {
 }
 
 // ============================================================ Registry
+// ============================================================ 5. Cost per Verified kWh
+const usd2 = (v: number | null) => (v == null || Number.isNaN(v) ? "—" : `$${v.toFixed(2)}`);
+function UnitCost(params: AgWidgetParams<UnitCostDef>) {
+  const { widgetApi, dataMapping } = params;
+  const fb = dataMapping.business?.at(0);
+  const fu = dataMapping.unitCost?.at(0);
+  const fp = dataMapping.paid?.at(0);
+  const fe = dataMapping.energy?.at(0);
+  const fr = dataMapping.reference?.at(0);
+  const extra = [fp, fe, fr].filter(Boolean) as NonNullable<typeof fp>[];
+  const res = useWidgetData(widgetApi, fb && fu ? { fields: [fb, fu, ...extra] } : null, params, "highlight");
+  if (!fb || !fu) return <AgIncompleteDataMappingOverlay />;
+  if (!res) return <AgLoadingOverlay />;
+  const rows = res.results.rows
+    .map((r) => ({ b: r[fb.key], u: n(r[fu.key]), p: fp ? n(r[fp.key]) : null, e: fe ? n(r[fe.key]) : null, ref: fr ? n(r[fr.key]) : null }))
+    .filter((r) => r.u != null && Number.isFinite(r.u))
+    .sort((a, b) => a.u! - b.u!); // lowest unit cost first
+  if (!rows.length) return <AgNoDataOverlay />;
+  // Weighted event average: the mapped reference field, else Σ paid ÷ Σ verified kWh (never a mean of rates).
+  const sumP = rows.reduce((a, r) => a + (r.p ?? 0), 0);
+  const sumE = rows.reduce((a, r) => a + (r.e ?? 0), 0);
+  const ref = rows.find((r) => r.ref != null)?.ref ?? (fp && fe && sumE > 0 ? sumP / sumE : null);
+  const max = Math.max(...rows.map((r) => r.u!), ref ?? 0) * 1.12 || 1;
+  const selected = new Set((widgetApi.getCrossFilterSelections() ?? []).flatMap((s) => (s.type === "value" ? s.values : [])));
+  const toggle = (e: MouseEvent, b: unknown) => {
+    widgetApi.toggleCrossFilter({ type: "value", value: b as string, field: fb, group: 0, reset: !(e.metaKey || e.ctrlKey) });
+    e.stopPropagation();
+  };
+  const LABEL_W = 150;
+  const VALUE_W = 64;
+  return (
+    <Shell foot={<><span>USD per verified kWh · confirmed PayPal items only · lowest first</span>{ref != null && <span style={{ color: C.info }}>┆ Event weighted avg {usd2(ref)}/kWh</span>}<SimTag /></>}>
+      <div onClick={() => widgetApi.resetCrossFilter()} style={{ position: "relative", height: "100%", overflow: "auto", display: "grid", alignContent: "start", gap: 10, paddingTop: ref != null ? 16 : 2 }}>
+        {ref != null && (
+          <div aria-hidden style={{ position: "absolute", top: 0, bottom: 0, left: `calc(${LABEL_W}px + (100% - ${LABEL_W + VALUE_W}px) * ${ref / max})`, width: 0, borderLeft: `1.5px dashed ${C.info}`, pointerEvents: "none", zIndex: 1 }}>
+            <span style={{ position: "absolute", top: 0, left: 4, fontSize: 10, color: C.info, whiteSpace: "nowrap" }}>avg {usd2(ref)}</span>
+          </div>
+        )}
+        {rows.map((r) => {
+          const name = widgetApi.formatFieldValue(fb, r.b);
+          const isSel = selected.has(r.b as never);
+          const dim = selected.size > 0 && !isSel;
+          const tip = [`${name}`, r.p != null ? `Paid ${usd2(r.p)} (PayPal item confirmed)` : null, r.e != null ? `Verified ${fmtNum(r.e, 2)} kWh` : null, `Unit cost ${usd2(r.u)} per verified kWh`, ref != null ? `Event weighted avg ${usd2(ref)}/kWh` : null].filter(Boolean).join("\n");
+          return (
+            <button key={String(r.b)} title={tip} aria-label={tip.replaceAll("\n", ", ")} aria-pressed={isSel} onClick={(e) => toggle(e, r.b)} style={{ all: "unset", cursor: "pointer", opacity: dim ? 0.4 : 1, display: "grid", gridTemplateColumns: `${LABEL_W}px 1fr ${VALUE_W}px`, alignItems: "center", fontSize: 12 }}>
+              <span style={{ color: C.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", paddingRight: 8 }}>{name}</span>
+              <span style={{ position: "relative", height: 14, borderRadius: 4, background: C.surface2 }}>
+                <span style={{ position: "absolute", inset: 0, width: `${(r.u! / max) * 100}%`, background: isSel ? C.signal : C.info, borderRadius: 4, transition: "width 400ms" }} />
+              </span>
+              <span style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", color: C.ink }}>{usd2(r.u)}</span>
+            </button>
+          );
+        })}
+      </div>
+    </Shell>
+  );
+}
+
 const ICON = (d: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 
 export function peakshiftWidgetTypes() {
@@ -438,7 +498,29 @@ export function peakshiftWidgetTypes() {
       featureConfig: { crossFilter: { supportsHighlight: true } },
       ai: { label: "Settlement Pulse", description: "Submitted / paid / in-flight / exception amounts and a status distribution of PayPal payout items. Paid means item status SUCCEEDED only. Use for payout reconciliation questions.", usage: "Map status=payoutItems.payoutStatus, amount=payoutItems.amountMinor (sum)." },
     },
+    {
+      id: "peakshift-unit-cost",
+      label: "Cost per Verified kWh",
+      icon: ICON('<path d="M4 6h7M4 12h12M4 18h16"/><path d="M14 3v18" stroke-dasharray="2 2"/>'),
+      dataMapping: {
+        business: category("Business name (participantEfficiency.businessName). Shown on the Y-axis."),
+        unitCost: numeric("USD per verified kWh (participantEfficiency.costPerVerifiedKwhUsd, max). Precomputed server-side; do not use a calculated measure."),
+        paid: numeric("Confirmed paid amount in USD (participantEfficiency.paidAmountUsd, sum). Used in the tooltip.", false),
+        energy: numeric("Verified energy in kWh (participantEfficiency.verifiedEnergyKwh, sum). Used in the tooltip.", false),
+        reference: numeric("Event weighted average USD per verified kWh (participantEfficiency.eventWeightedAverageCostPerVerifiedKwhUsd, max). Drawn as a dashed reference line.", false),
+      },
+      form: (p: AgWidgetFormParams<UnitCostDef>) => p.createDefaults({ supportsCrossHighlight: true, dataMappingItems: [{ key: "business", label: "Business" }, { key: "unitCost", label: "Cost per verified kWh (USD)" }, { key: "paid", label: "Paid (USD)" }, { key: "energy", label: "Verified energy (kWh)" }, { key: "reference", label: "Event weighted average (USD/kWh)" }] }),
+      comp: UnitCost,
+      defaultSize: { width: 520, height: 260 },
+      minSize: { width: 340, height: 180 },
+      featureConfig: { crossFilter: { supportsHighlight: true } },
+      ai: {
+        label: "Cost per Verified kWh",
+        description: "Horizontal bars of USD paid per verified kWh for each business, sorted lowest to highest with two-decimal labels, a tooltip showing paid USD, verified kWh and unit cost, and a dashed reference line at the event's weighted average. Only confirmed (SUCCEEDED) PayPal payout items are included. Use for incentive efficiency / unit-cost questions.",
+        usage: "Map business=participantEfficiency.businessName, unitCost=participantEfficiency.costPerVerifiedKwhUsd (max), paid=participantEfficiency.paidAmountUsd (sum), energy=participantEfficiency.verifiedEnergyKwh (sum), reference=participantEfficiency.eventWeightedAverageCostPerVerifiedKwhUsd (max).",
+      },
+    },
   ];
 }
 
-export const WIDGET_MENU = [{ label: "PeakShift", widgetIds: ["peakshift-flex-capacity", "peakshift-load-shift-evidence", "peakshift-participant-contribution", "peakshift-settlement-pulse"] }];
+export const WIDGET_MENU = [{ label: "PeakShift", widgetIds: ["peakshift-flex-capacity", "peakshift-load-shift-evidence", "peakshift-participant-contribution", "peakshift-settlement-pulse", "peakshift-unit-cost"] }];
