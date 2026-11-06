@@ -20,7 +20,6 @@ export function DemoEntry({ paypal, ai, businesses, event }: { paypal: "sandbox"
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [how, setHow] = useState(false);
-  const [pick, setPick] = useState(false);
 
   async function enter(userId: string, to: string) {
     setBusy(userId);
@@ -89,26 +88,25 @@ export function DemoEntry({ paypal, ai, businesses, event }: { paypal: "sandbox"
             <div className="micro">Business participant</div>
             <div className="mt-2 text-[24px] font-semibold tracking-[-0.02em]">Open business view</div>
             <p className="mt-2 text-[14px] text-ink-2">See an offer the way an owner does — on a phone, in plain language, with the choice to accept or decline.</p>
-            <button onClick={() => setPick((p) => !p)} className="mt-5 inline-flex items-center gap-2 rounded-[8px] border border-line-2 bg-surface-2 px-4 py-2.5 text-[14px] font-medium hover:bg-surface-3" aria-expanded={pick}>
-              Choose a business <ChevronDown className={cx("size-4 transition", pick && "rotate-180")} />
-            </button>
-            {pick && (
-              <ul className="mt-3 divide-y divide-line rounded-[10px] border border-line anim-fade-up">
-                {businesses.map((b) => (
-                  <li key={b.userId}>
-                    <button onClick={() => enter(b.userId, "/business/home")} disabled={!!busy} className="flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left hover:bg-surface-2">
-                      <span className="min-w-0">
-                        <span className="block text-[13.5px] font-medium">{b.name}</span>
-                        <span className="block text-[12px] text-ink-3">
-                          {b.owner} · {b.category}
-                        </span>
-                      </span>
-                      {busy === b.userId ? <span className="text-[12px] text-ink-2">Opening…</span> : b.pending ? <Badge tone="warning">{b.pending} offer</Badge> : <ArrowRight className="size-4 text-ink-3" />}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="micro mt-5 !text-ink-3">Choose a business</div>
+            <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-label="Choose a business">
+              {businesses.map((b) => (
+                <li key={b.userId}>
+                  <button
+                    onClick={() => enter(b.userId, "/business/home")}
+                    disabled={!!busy}
+                    title={`${b.name} — ${b.owner} · ${b.category}`}
+                    className="group flex h-full w-full items-center justify-between gap-2 rounded-[10px] border border-line bg-surface-2/60 px-3 py-2 text-left transition hover:border-signal/40 hover:bg-surface-2 disabled:opacity-60"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13px] font-medium">{b.name}</span>
+                      <span className="block truncate text-[11.5px] text-ink-3">{b.owner}</span>
+                    </span>
+                    {busy === b.userId ? <span className="shrink-0 text-[11.5px] text-ink-2">Opening…</span> : b.pending ? <Badge tone="warning">{b.pending} offer</Badge> : <ArrowRight className="size-3.5 shrink-0 text-ink-3 transition group-hover:translate-x-0.5 group-hover:text-ink" />}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
