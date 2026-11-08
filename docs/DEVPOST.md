@@ -80,7 +80,7 @@ The difficult part of paying many small actors is trust, not the payment itself.
 ## Testing instructions (paste into the Devpost "testing instructions" field)
 
 1. Open https://peakshift-seven.vercel.app/demo → **Open operator workspace** (operator: Lenin Briggs). No PeakShift account or installation required: accounts are a one-click demo role switch. Only the PayPal Checkout step needs the sandbox buyer login below.
-2. The demo is shared between judges. If the event is not *Awaiting funding*, go to `/demo` → **Platform admin** → **Settings** → **Reset demo scenario**. A completed run can also be explored as it is.
+2. The demo is shared between judges. If the event is already complete, click **Start a fresh run** on the Overview to restore it to *Awaiting funding*. A completed run can also be explored as it is. If another judge is mid-run, the button explains that and becomes available once that run has been idle for 10 minutes.
 3. To fund the $12.00 budget, approve PayPal sandbox Checkout with this sandbox **Personal** buyer account:
    - Email: `_judge sandbox buyer email_`
    - Password: `_judge sandbox buyer password_`

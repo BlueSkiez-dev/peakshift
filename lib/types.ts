@@ -428,6 +428,8 @@ export interface AppState {
   audit: AuditEvent[];
   /** Scenario clock (ISO). Every workflow record is stamped from it so the demo replays a coherent timeline. */
   clock?: string;
+  /** Real wall-clock time of the last audited action. Guards the shared "Start a fresh run" reset. */
+  lastActivityAt?: string;
   aiRuns: AiRun[];
   studioReports?: StudioReport[];
 }

@@ -17,6 +17,7 @@ import type {
 } from "./types";
 import { audit, correlation, hashOf, mutate, nowIso, read, resetState, uid } from "./store";
 import { HttpError } from "./auth";
+import { demoEvent, resetEligibility } from "./demo-reset";
 import { optimise, OPTIMISER_VERSION } from "./optimiser";
 import { generateDatasets } from "./meter";
 import { BASELINE_METHOD, FORMULA_VERSION, verifyParticipant } from "./verification";
@@ -731,6 +732,19 @@ export async function resetDemo(u: User) {
   if (u.role !== "admin") throw new HttpError(403, "FORBIDDEN", "Only the platform admin can reset the demo.");
   await resetState();
   await mutate((s) => audit(s, { ...actor(u), entityType: "demo", entityId: s.seedVersion, action: "demo.reset", summary: "Demo reset to the seeded scenario. Prior demo payouts and records cleared." }));
+  return { ok: true };
+}
+
+/** Operator-level "Start a fresh run": same reset, but refused while another judge's run is active. */
+export async function startFreshRun(u: User) {
+  if (!["operator", "admin"].includes(u.role)) throw new HttpError(403, "FORBIDDEN", "Only the programme operator can start a fresh run.");
+  const before = read();
+  const ev = demoEvent(before);
+  const elig = resetEligibility(before);
+  if (!elig.allowed) throw new HttpError(409, "RUN_IN_PROGRESS", elig.reason);
+  const prior = ev ? `${ev.status}${ev.funding.captureId ? `, capture ${ev.funding.captureId}` : ""}` : "none";
+  await resetState();
+  await mutate((s) => audit(s, { ...actor(u), entityType: "demo", entityId: s.seedVersion, action: "demo.reset", summary: `Fresh run started by ${u.displayName}. Previous run (${prior}) cleared; seeded event restored. ${elig.reason}` }));
   return { ok: true };
 }
 

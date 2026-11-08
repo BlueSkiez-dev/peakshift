@@ -1,6 +1,6 @@
 # Demo video script — target 2:50 (hard limit 3:00)
 
-Record at 1440×900 or larger, browser at 100% zoom, on the live site. Before recording, **Reset demo scenario** (admin), and have the sandbox buyer login ready. Use no music, or royalty-free music you have rights to. Don't show the design-reference screenshots or other brands' products.
+Record at 1440×900 or larger, browser at 100% zoom, on the live site. Before recording, click **Start a fresh run** on the Overview, and have the sandbox buyer login ready. Use no music, or royalty-free music you have rights to. Don't show the design-reference screenshots or other brands' products.
 
 Tip: record the PayPal Payouts wait separately and cut it; sandbox items usually settle in 30–90 s.
 

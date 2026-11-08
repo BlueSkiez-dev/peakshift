@@ -9,6 +9,8 @@ import { Badge, Empty, Kpi, Meter, Notice, PageHeader, Panel, SimulatedNote, Sta
 import { Pipeline } from "@/components/pipeline";
 import { DemandChart } from "@/components/charts-lazy";
 import { scenarioNow, scenarioNowMs } from "@/lib/clock";
+import { resetEligibility } from "@/lib/demo-reset";
+import { FreshRun } from "@/components/fresh-run";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +36,8 @@ export default async function Overview() {
   const exceptions = net.filter((n) => n.status === "critical");
   const committedCost = accepted.reduce((a, o) => a + o.maxRewardMinor, 0);
   const paidMinor = batch?.items.filter((i) => i.status === "SUCCEEDED").reduce((a, i) => a + i.amountMinor, 0) ?? 0;
-  const gapWh = Math.max(0, ev.targetWh - (run ? run.totals.verifiedWh : acceptedWh));
+  const elig = resetEligibility(s);
+  const gapWh =Math.max(0, ev.targetWh - (run ? run.totals.verifiedWh : acceptedWh));
 
   return (
     <div className="space-y-6">
@@ -43,11 +46,20 @@ export default async function Overview() {
         title="Overview"
         desc="The current peak event, the flexibility you have secured, and what needs your attention next."
         actions={
+          <div className="flex flex-wrap items-center gap-2">
+          {ev.status !== "AWAITING_FUNDING" && <FreshRun allowed={elig.allowed} reason={elig.reason} />}
           <Link href="/operator/events/new" className="inline-flex h-10 items-center gap-2 rounded-[8px] border border-line-2 bg-surface-2 px-4 text-sm hover:bg-surface-3">
             <CalendarPlus className="size-4" /> Create event
           </Link>
+          </div>
         }
       />
+
+      {ev.status === "PAID" && (
+        <Notice tone="info" title="This run is complete">
+          Explore the funded, verified and paid event as it is, or click <b className="text-ink">Start a fresh run</b> to fund and settle it yourself through PayPal sandbox.
+        </Notice>
+      )}
 
       {/* Current event */}
       <section className="rounded-[14px] border border-line bg-surface shadow-[var(--shadow)] anim-fade-up">

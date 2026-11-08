@@ -23,7 +23,7 @@ PeakShift helps an energy programme operator turn small-business electricity fle
 No PeakShift account or installation required. Explore the application immediately using demo accounts. Completing the PayPal Checkout flow requires a PayPal sandbox Personal buyer account, provided in the Devpost testing instructions.
 
 1. Open **https://peakshift-seven.vercel.app/demo** and click **Open operator workspace**. Every PeakShift account is a one-click role switch (demo-only and audited).
-2. **Check the event state first.** The demo is shared between reviewers. If the Wednesday peak event is not *Awaiting funding*, go to `/demo` → **Platform admin** → **Settings** → **Reset demo scenario**. Prefer just to look around? Leave it: a completed run shows every screen fully populated.
+2. **Check the event state first.** The demo is shared between reviewers. If the Wednesday peak event is already complete, click **Start a fresh run** on the Overview to restore it to *Awaiting funding*. Prefer just to look around? Leave it: a completed run shows every screen fully populated.
 3. **Fund the $12.00 budget** with real PayPal sandbox Checkout, signing in with the sandbox Personal buyer account from the Devpost testing instructions (or any sandbox Personal account of your own). The app's own seller account cannot pay itself.
 4. Follow the [judge walkthrough](#judge-walkthrough-5-minutes). Every other step — plan, offers, verification, settlement, real sandbox Payouts and signed webhooks — runs in the app with no further credentials.
 
@@ -85,7 +85,7 @@ Nothing here claims a real grid outcome. Every energy screen carries a *Simulate
 10. **Payments**: batch vs item status tracked separately, item history, signature-verified webhook receipts (rejected ones grouped separately), the redacted PayPal response and a ledger CSV.
 11. Switch to the business view → **Earnings** shows the verified reward and PayPal reference — and only that business's data.
 
-**Admin reset:** `/demo` → *Platform admin* → Settings → **Reset demo scenario** (audited).
+**Fresh run:** Overview → **Start a fresh run** (operator, audited). It resets a completed or unfunded event immediately, but refuses while another reviewer’s run is in progress until it has been idle for 10 minutes. The platform admin can still reset unconditionally from Settings.
 
 ### Demo accounts (role switch on `/demo`, demo-only and audited)
 
@@ -158,7 +158,7 @@ Requires **Node 20+** (tested on Node 24).
 npm install
 cp .env.example .env.local   # optional: add PayPal sandbox + Anthropic keys
 npm run dev                  # http://localhost:3000 → /demo
-npm test                     # 31 tests: domain, Energy Intelligence, chronology, reconciliation, unit cost
+npm test                     # 36 tests: domain, Energy Intelligence, chronology, reconciliation, unit cost, fresh-run guard
 npm run lint                 # ESLint (next/core-web-vitals + typescript)
 ```
 
@@ -228,7 +228,7 @@ lib/
   efficiency.ts          participantEfficiency projection (paid USD per verified kWh, weighted average)
   status.ts, terms.ts    one shared status and metric vocabulary used by every screen
 components/              design system, charts (AG Charts), grids (AG Grid), AG Studio workspace
-tests/                   domain, Energy Intelligence, chronology, reconciliation, unit cost (31 tests)
+tests/                   domain, Energy Intelligence, chronology, reconciliation, unit cost, fresh-run guard (36 tests)
 ```
 
 Money is integer cents and energy is integer Wh throughout. Rewards are recalculated on the server at approval and checked against a review hash, so browser totals are never trusted.
@@ -237,7 +237,7 @@ Money is integer cents and energy is integer Wh throughout. Rewards are recalcul
 
 - Single peak window and a linear lowest-cost model, not a network-constrained dispatch.
 - The M&V method is a conservative demo heuristic, not a certified methodology.
-- Demo auth is a signed cookie with a role switch, and the live demo is shared between reviewers (reset is one click).
+- Demo auth is a signed cookie with a role switch, and the live demo is shared between reviewers (Start a fresh run is one click on the Overview, guarded so it never wipes another reviewer’s active run).
 - State is a single JSONB document in Postgres rather than a normalised schema — enough for one demo organisation; the read/mutate contract allows a later move to relational tables.
 
 ## Licence and acknowledgements

@@ -43,7 +43,7 @@ export default async function Settings() {
         </Panel>
       </div>
       <Panel title="Demo controls" subtitle="Restores the seeded scenario: 6 businesses, 1 event awaiting funding. Clears demo-generated plans, offers, readings, settlements and payout records.">
-        {u?.role === "admin" ? <ResetDemo /> : <p className="text-[13px] text-ink-3">Only the platform admin can reset the demo. Sign in as admin from the demo entry page.</p>}
+        {u?.role === "admin" ? <ResetDemo /> : <p className="text-[13px] text-ink-3">To restore the seeded event, use Start a fresh run on the Overview. The unconditional reset here is for the platform admin.</p>}
       </Panel>
     </div>
   );

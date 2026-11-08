@@ -294,6 +294,7 @@ export function audit(
 ) {
   const ev: AuditEvent = { id: uid("aud"), at: advance(s, 1000), correlationId: e.correlationId ?? correlation(), ...e };
   s.audit.unshift(ev);
+  s.lastActivityAt = new Date().toISOString();
   if (s.audit.length > 500) s.audit.length = 500;
   return ev;
 }

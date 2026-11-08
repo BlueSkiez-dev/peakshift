@@ -194,6 +194,7 @@ on("GET", "cron/keepalive", async ({ req }) => {
   return { ok: true, mode: db.mode, at: new Date().toISOString() };
 });
 on("GET", "config/public", async () => ({ paypalMode: paypalMode(), paypalClientId: paypalPublicClientId() }));
+on("POST", "demo/fresh-run", async () => svc.startFreshRun(await requireUser(OPERATOR_ROLES)));
 on("POST", "admin/demo-reset", async () => svc.resetDemo(await requireUser(["admin"])));
 on("POST", "webhooks/paypal", async ({ req }) => svc.handlePayPalWebhook(req.headers, await req.text()));
 
