@@ -1,6 +1,8 @@
 # Devpost submission — PeakShift (draft to paste)
 
-**Tagline:** AI-coordinated demand flexibility with verified PayPal incentive payouts.
+**Elevator pitch (179/200):** Small businesses shift electricity use out of the evening peak. Claude plans it, meter data verifies it, and PayPal Payouts pays each business only for energy it actually shifted.
+
+**Thumbnail (3:2, 1500×1000):** `docs/devpost/thumbnail.png`
 
 **Links**
 - Live demo: https://peakshift-seven.vercel.app (start at `/demo`)
