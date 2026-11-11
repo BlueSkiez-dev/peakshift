@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
+import { BizLink } from "@/components/biz-link";
 import { ArrowLeft, Ban, CalendarClock, CircleDollarSign, Clock3, ShieldCheck, Zap } from "lucide-react";
 import type { offerView } from "@/lib/business-view";
 import { api, useAction } from "@/lib/client";
@@ -35,9 +35,9 @@ export function OfferDetail({ v }: { v: V }) {
 
   return (
     <div className="space-y-5 pb-24 md:pb-0">
-      <Link href="/business/offers" className="inline-flex items-center gap-1.5 text-[13px] text-ink-2 hover:text-ink">
+      <BizLink href="/business/offers" className="inline-flex items-center gap-1.5 text-[13px] text-ink-2 hover:text-ink">
         <ArrowLeft className="size-4" /> Offers
-      </Link>
+      </BizLink>
 
       <header className="anim-fade-up">
         <div className="flex flex-wrap items-center gap-2">
@@ -67,7 +67,7 @@ export function OfferDetail({ v }: { v: V }) {
             <div className="col-span-2 rounded-[10px] bg-surface p-3"><dt className="text-ink-3">When</dt><dd className="mt-0.5">Run it between {clock(o.shiftWindow.start)} and {clock(o.shiftWindow.end)}, not during {windowLabel(ev.peak)}</dd></div>
           </dl>
           <p className="mt-3 text-[13px] text-ink-2"><b className="text-ink">What happens next:</b> after the event, your meter readings are compared with your usual day. Your reward is calculated only from the energy that actually shifted, then paid through PayPal.</p>
-          <Link href="/business/earnings" className="mt-3 inline-flex text-[13px] font-medium text-brand underline-offset-4 hover:underline">Track this in Earnings →</Link>
+          <BizLink href="/business/earnings" className="mt-3 inline-flex text-[13px] font-medium text-brand underline-offset-4 hover:underline">Track this in Earnings →</BizLink>
         </section>
       )}
       {o.status === "DECLINED" && <Notice tone="neutral" title="Offer declined">No commitment was created. You won&apos;t be penalised; the operator may send a different offer in future.</Notice>}

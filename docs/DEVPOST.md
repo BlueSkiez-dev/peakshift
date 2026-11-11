@@ -86,7 +86,7 @@ The difficult part of paying many small actors is trust, not the payment itself.
    - Password: `_judge sandbox buyer password_`
 
    This is a sandbox-only test account; no real money is involved.
-4. Then: **Find the lowest-cost plan** → **Publish offers** → *Open as business* and accept the three offers → **Run demo event** → **Run verification** → **Review rewards and settlement** → **Approve and send payouts** → **Payments** to watch each recipient item reconcile.
+4. Then: **Find the lowest-cost plan** → **Publish offers** → *Open as business* (each opens in a new tab; the operator tab stays signed in) and accept the three offers → **Run demo event** → **Run verification** → **Review rewards and settlement** → **Approve and send payouts** → **Payments** to watch each recipient item reconcile.
 5. **Energy Intelligence** → **Ask PeakShift Analyst** → "Why was NorthCool Storage excluded from this dispatch?"
 
 The full walkthrough and local setup are in the repository README.

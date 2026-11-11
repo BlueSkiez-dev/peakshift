@@ -1,7 +1,8 @@
 // Demo authentication: a signed, httpOnly session cookie that names a seeded demo user.
 // Every privileged API route re-checks role and ownership server-side (PRD §4.2).
 import crypto from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { AS_HEADER } from "./as";
 import type { Role, User } from "./types";
 import { readFresh } from "./store";
 
@@ -26,6 +27,12 @@ export function verify(token: string | undefined): string | null {
 }
 
 export async function currentUser(): Promise<User | null> {
+  // Tab-scoped business view (lib/as.ts). Only ever resolves to a business user; anything else is signed out.
+  const asId = await headers().then((h) => h.get(AS_HEADER), () => null);
+  if (asId) {
+    const u = (await readFresh()).users.find((x) => x.id === asId);
+    return u && u.role === "business" ? u : null;
+  }
   const jar = await cookies();
   const id = verify(jar.get(SESSION_COOKIE)?.value);
   if (!id) return null;

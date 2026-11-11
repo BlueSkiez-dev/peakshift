@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Building2, ChevronDown, Gauge, ShieldCheck, Sparkles, Wallet, Waves } from "lucide-react";
 import { api } from "@/lib/client";
+import { businessViewUrl } from "@/lib/as";
 import { Wordmark } from "@/components/brand";
 import { Badge, EnvLabels, cx } from "@/components/ui";
 import { EVENT_STATUS } from "@/lib/status";
@@ -92,18 +93,17 @@ export function DemoEntry({ paypal, ai, businesses, event }: { paypal: "sandbox"
             <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2" aria-label="Choose a business">
               {businesses.map((b) => (
                 <li key={b.userId}>
-                  <button
-                    onClick={() => enter(b.userId, "/business/home")}
-                    disabled={!!busy}
-                    title={`${b.name} — ${b.owner} · ${b.category}`}
+                  <a
+                    href={businessViewUrl(b.userId)}
+                    title={`${b.name} — ${b.owner} · ${b.category} (opens in its own view; middle-click for a new tab)`}
                     className="group flex h-full w-full items-center justify-between gap-2 rounded-[10px] border border-line bg-surface-2/60 px-3 py-2 text-left transition hover:border-signal/40 hover:bg-surface-2 disabled:opacity-60"
                   >
                     <span className="min-w-0">
                       <span className="block truncate text-[13px] font-medium">{b.name}</span>
                       <span className="block truncate text-[11.5px] text-ink-3">{b.owner}</span>
                     </span>
-                    {busy === b.userId ? <span className="shrink-0 text-[11.5px] text-ink-2">Opening…</span> : b.pending ? <Badge tone="warning">{b.pending} offer</Badge> : <ArrowRight className="size-3.5 shrink-0 text-ink-3 transition group-hover:translate-x-0.5 group-hover:text-ink" />}
-                  </button>
+                    {b.pending ? <Badge tone="warning">{b.pending} offer</Badge> : <ArrowRight className="size-3.5 shrink-0 text-ink-3 transition group-hover:translate-x-0.5 group-hover:text-ink" />}
+                  </a>
                 </li>
               ))}
             </ul>

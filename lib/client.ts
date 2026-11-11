@@ -1,7 +1,14 @@
 "use client";
 // Browser API helper. Returns the server's authoritative data or throws a typed error.
 import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { AS_HEADER, asPrefix, asUserId } from "./as";
+
+/** Prefix a /business/... path so it stays inside the current tab-scoped business view, if any. */
+export function useBizHref() {
+  const prefix = asPrefix(usePathname());
+  return (href: string) => (href.startsWith("/business") ? prefix + href : href);
+}
 
 export class ApiError extends Error {
   constructor(
@@ -16,10 +23,14 @@ export class ApiError extends Error {
 
 export async function api<T = unknown>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
   let res: Response;
+  const headers: Record<string, string> = {};
+  if (init.body) headers["content-type"] = "application/json";
+  const asId = typeof window !== "undefined" ? asUserId(window.location.pathname) : null;
+  if (asId) headers[AS_HEADER] = asId; // tab-scoped business view acts as that business only
   try {
     res = await fetch(`/api/v1/${path}`, {
       method: init.method ?? (init.body ? "POST" : "GET"),
-      headers: init.body ? { "content-type": "application/json" } : undefined,
+      headers,
       body: init.body ? JSON.stringify(init.body) : undefined,
       cache: "no-store",
     });

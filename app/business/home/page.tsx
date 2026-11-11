@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BizLink } from "@/components/biz-link";
 import { ArrowRight, CalendarClock, CheckCircle2, ShieldCheck, SlidersHorizontal, Wallet } from "lucide-react";
 import { pageUser } from "@/lib/auth";
 import { readFresh } from "@/lib/store";
@@ -33,7 +33,7 @@ export default async function BusinessHome() {
       </div>
 
       {pending && (
-        <Link href={`/business/offers/${pending.id}`} className="group block overflow-hidden rounded-[16px] border border-brand/20 bg-surface shadow-[var(--shadow)] anim-fade-up">
+        <BizLink href={`/business/offers/${pending.id}`} className="group block overflow-hidden rounded-[16px] border border-brand/20 bg-surface shadow-[var(--shadow)] anim-fade-up">
           <div className="flex items-center justify-between bg-brand px-5 py-3 text-white">
             <span className="flex items-center gap-2 text-[13px] font-medium">
               <CalendarClock className="size-4 text-signal" /> Offer for your business
@@ -64,7 +64,7 @@ export default async function BusinessHome() {
               </span>
             </div>
           </div>
-        </Link>
+        </BizLink>
       )}
 
       {committed.length > 0 && (
@@ -77,7 +77,7 @@ export default async function BusinessHome() {
               const ev = s.events.find((e) => e.id === o.eventId)!;
               return (
                 <li key={o.id}>
-                  <Link href={`/business/offers/${o.id}`} className="flex items-center justify-between gap-3 rounded-[10px] bg-surface-2/70 px-4 py-3 hover:bg-surface-2">
+                  <BizLink href={`/business/offers/${o.id}`} className="flex items-center justify-between gap-3 rounded-[10px] bg-surface-2/70 px-4 py-3 hover:bg-surface-2">
                     <span className="min-w-0">
                       <span className="block text-[14px] font-medium">{o.activityName}</span>
                       <span className="block text-[12.5px] text-ink-2 num">
@@ -85,7 +85,7 @@ export default async function BusinessHome() {
                       </span>
                     </span>
                     <StatusBadge meta={OFFER_STATUS[o.status]} />
-                  </Link>
+                  </BizLink>
                 </li>
               );
             })}
@@ -94,7 +94,7 @@ export default async function BusinessHome() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Link href="/business/flexibility" className="group rounded-[14px] border border-line bg-surface p-5 hover:border-line-2">
+        <BizLink href="/business/flexibility" className="group rounded-[14px] border border-line bg-surface p-5 hover:border-line-2">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2 text-[15px] font-semibold">
               <SlidersHorizontal className="size-4 text-ink-3" /> My flexibility
@@ -120,9 +120,9 @@ export default async function BusinessHome() {
           <span className="mt-3 inline-flex items-center gap-1 text-[13px] text-brand group-hover:underline">
             Update with AI <ArrowRight className="size-3.5" />
           </span>
-        </Link>
+        </BizLink>
 
-        <Link href="/business/earnings" className="group rounded-[14px] border border-line bg-surface p-5 hover:border-line-2">
+        <BizLink href="/business/earnings" className="group rounded-[14px] border border-line bg-surface p-5 hover:border-line-2">
           <span className="flex items-center gap-2 text-[15px] font-semibold">
             <Wallet className="size-4 text-ink-3" /> Earnings
           </span>
@@ -144,7 +144,7 @@ export default async function BusinessHome() {
           <span className="mt-3 inline-flex items-center gap-1 text-[13px] text-brand group-hover:underline">
             View earnings <ArrowRight className="size-3.5" />
           </span>
-        </Link>
+        </BizLink>
       </div>
     </div>
   );

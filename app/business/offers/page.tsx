@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BizLink } from "@/components/biz-link";
 import { ArrowRight, Inbox } from "lucide-react";
 import { pageUser } from "@/lib/auth";
 import { readFresh } from "@/lib/store";
@@ -19,7 +19,7 @@ export default async function Offers() {
         <p className="mt-1 text-[13.5px] text-ink-2">Each offer is a specific request: what to move, when, and what you can earn. You decide.</p>
       </div>
       {offers.length === 0 ? (
-        <Empty icon={<Inbox className="size-6" />} title="No offers yet" action={<Link href="/business/flexibility" className="rounded-[8px] bg-brand px-4 py-2 text-sm font-semibold text-white">Review my flexibility</Link>}>
+        <Empty icon={<Inbox className="size-6" />} title="No offers yet" action={<BizLink href="/business/flexibility" className="rounded-[8px] bg-brand px-4 py-2 text-sm font-semibold text-white">Review my flexibility</BizLink>}>
           When the programme needs your flexibility, an offer will appear here. Keeping your profile confirmed makes you eligible.
         </Empty>
       ) : (
@@ -28,7 +28,7 @@ export default async function Offers() {
             const ev = s.events.find((e) => e.id === o.eventId)!;
             return (
               <li key={o.id}>
-                <Link href={`/business/offers/${o.id}`} className="block rounded-[14px] border border-line bg-surface p-4 hover:border-line-2">
+                <BizLink href={`/business/offers/${o.id}`} className="block rounded-[14px] border border-line bg-surface p-4 hover:border-line-2">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[12.5px] text-ink-2">{dateLabel(ev.eventDate)}</span>
                     <StatusBadge meta={OFFER_STATUS[o.status]} />
@@ -40,7 +40,7 @@ export default async function Offers() {
                   <div className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-brand">
                     Review offer <ArrowRight className="size-3.5" />
                   </div>
-                </Link>
+                </BizLink>
               </li>
             );
           })}

@@ -1,10 +1,9 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Check, ExternalLink, Play, RefreshCw, ScanLine } from "lucide-react";
 import type { DemandEvent, DispatchPlan, Offer } from "@/lib/types";
 import { api, useAction } from "@/lib/client";
+import { businessViewUrl } from "@/lib/as";
 import { OFFER_STATUS } from "@/lib/status";
 import { kwh, money, rate, stamp, windowLabel } from "@/lib/format";
 import { toIdx } from "@/lib/windows";
@@ -15,20 +14,14 @@ import { DemandChart } from "../charts-lazy";
 type Org = { id: string; name: string; category: string; ownerId: string };
 
 export function OffersStage({ ev, offers, orgs, plan }: { ev: DemandEvent; offers: Offer[]; orgs: Org[]; plan: DispatchPlan | null }) {
-  const router = useRouter();
-  const [switching, setSwitching] = useState<string | null>(null);
   const live = offers.filter((o) => o.status !== "SUPERSEDED");
   const accepted = live.filter((o) => o.status === "ACCEPTED");
   const acceptedWh = accepted.reduce((a, o) => a + o.allocatedWh, 0);
   const declined = live.filter((o) => o.status === "DECLINED");
   const name = (id: string) => orgs.find((o) => o.id === id)?.name ?? id;
 
-  async function openAs(o: Offer) {
-    const org = orgs.find((x) => x.id === o.orgId)!;
-    setSwitching(o.id);
-    await api("session", { body: { userId: org.ownerId } });
-    router.push(`/business/offers/${o.id}`);
-  }
+  // Each business opens in its own tab with a tab-scoped identity (lib/as.ts), so this operator tab stays signed in.
+  const businessUrl = (o: Offer) => businessViewUrl(orgs.find((x) => x.id === o.orgId)!.ownerId, `/business/offers/${o.id}`);
 
   if (!live.length)
     return (
@@ -70,14 +63,16 @@ export function OffersStage({ ev, offers, orgs, plan }: { ev: DemandEvent; offer
               </div>
               <StatusBadge meta={OFFER_STATUS[o.status]} />
               {o.status === "ACTION_REQUIRED" && (
-                <Button size="sm" variant="secondary" onClick={() => openAs(o)} loading={switching === o.id} loadingLabel="Switching…" icon={<ExternalLink className="size-3.5" />}>
-                  Open as business
-                </Button>
+                <a href={businessUrl(o)} target="_blank" rel="noopener" className="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-line-2 bg-surface-2 px-3 text-[12.5px] font-medium hover:bg-surface-3">
+                  <ExternalLink className="size-3.5" /> Open as business
+                </a>
               )}
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-[12px] text-ink-3">“Open as business” is a demo-only role switch (audited). Operators cannot accept on a business&apos;s behalf.</p>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <p className="text-[12px] text-ink-3">“Open as business” opens that owner&apos;s view in a new tab (demo-only); this operator tab stays signed in. Operators cannot accept on a business&apos;s behalf — every response is audited under the business owner.</p>
+        </div>
       </Panel>
 
       <div className="space-y-4">

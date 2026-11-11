@@ -77,7 +77,7 @@ Nothing here claims a real grid outcome. Every energy screen carries a *Simulate
 2. **Overview** shows the active event, its 7-stage pipeline, KPIs, the baseline demand chart and the critical-load notice.
 3. **Fund event budget** → PayPal Checkout (sign in with the sandbox Personal buyer account) → the server verifies the capture.
 4. **Find the lowest-cost plan**: the merit-order stack, the allocation table with reasons, and the *Not selected / excluded* panel (hard safety vs. not needed vs. window mismatch). **Publish 3 offers**.
-5. **Offers → Open as business** (demo role switch). On a phone-sized view, review the offer, tick the commitment statement and **Accept**. Repeat for the other two.
+5. **Offers → Open as business** opens that owner’s view in a new tab, so the operator tab stays signed in. Review the offer, tick the commitment statement and **Accept**. Repeat for the other two (all three can be open at once), then return to the operator tab.
 6. **Execute → Run demo event** replays deterministic 15-minute data, then **Run verification**.
 7. **Verify**: baseline vs event chart, the plain-language formula, per-business attainment vs meter-data completeness, and a drilldown to individual interval readings.
 8. **Energy Intelligence** (`/operator/intelligence`): the *Event Performance* report opens in View mode. Click a business in **Participant Contribution** and Load Shift Evidence and Settlement Pulse re-scope through the data-model relationships; **Clear filters** restores the view. Click **Ask PeakShift Analyst**, then ask *"Build a chart comparing committed versus verified shifted energy by business for this event"* and *"Why was NorthCool Storage excluded from this dispatch?"*. Try *"Send the payouts now"* to see the refusal.
@@ -237,7 +237,7 @@ Money is integer cents and energy is integer Wh throughout. Rewards are recalcul
 
 - Single peak window and a linear lowest-cost model, not a network-constrained dispatch.
 - The M&V method is a conservative demo heuristic, not a certified methodology.
-- Demo auth is a signed cookie with a role switch, and the live demo is shared between reviewers (Start a fresh run is one click on the Overview, guarded so it never wipes another reviewer’s active run).
+- Demo auth is a signed cookie with a role switch; business views opened from the operator console use a tab-scoped `/as/<owner>/business/…` URL (business identities only), so operator and business tabs can be open side by side, and the live demo is shared between reviewers (Start a fresh run is one click on the Overview, guarded so it never wipes another reviewer’s active run).
 - State is a single JSONB document in Postgres rather than a normalised schema — enough for one demo organisation; the read/mutate contract allows a later move to relational tables.
 
 ## Licence and acknowledgements
