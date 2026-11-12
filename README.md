@@ -6,7 +6,7 @@ PeakShift helps an energy programme operator turn small-business electricity fle
 
 > **AI interprets. Deterministic code allocates and verifies. Humans approve. PayPal moves the money (sandbox).**
 
-**[▶ Open the live demo](https://peakshift-seven.vercel.app/demo)** · **[Watch the 3-minute video](YOUTUBE_VIDEO_URL)** · [Judge walkthrough](#judge-walkthrough-5-minutes)
+**[▶ Open the live demo](https://peakshift-seven.vercel.app/demo)** · **[Watch the 3-minute video](https://youtu.be/UgfwGXkFl7Y)** · [Judge walkthrough](#judge-walkthrough-5-minutes)
 
 ## Product screenshots
 
@@ -27,7 +27,7 @@ No PeakShift account or installation required. Explore the application immediate
 3. **Fund the $12.00 budget** with real PayPal sandbox Checkout, signing in with the sandbox Personal buyer account from the Devpost testing instructions (or any sandbox Personal account of your own). The app's own seller account cannot pay itself.
 4. Follow the [judge walkthrough](#judge-walkthrough-5-minutes). Every other step — plan, offers, verification, settlement, real sandbox Payouts and signed webhooks — runs in the app with no further credentials.
 
-**Video:** [Watch the 3-minute product demonstration](YOUTUBE_VIDEO_URL). The video shows the full experience; the walkthrough below is the detailed, hands-on guide for inspecting the implementation.
+**Video:** [Watch the 3-minute product demonstration](https://youtu.be/UgfwGXkFl7Y). The video shows the full experience; the walkthrough below is the detailed, hands-on guide for inspecting the implementation.
 
 ## The problem and how PeakShift works
 
