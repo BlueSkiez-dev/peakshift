@@ -8,7 +8,7 @@ PeakShift helps an energy programme operator turn small-business electricity fle
 
 Built for the **PayPal AI Hackathon** with PayPal Checkout, Payouts and Webhooks, Claude, and AG Grid / AG Charts / AG Studio.
 
-**[▶ Open the live demo](https://peakshift-seven.vercel.app/demo)** · **[Watch the demo video](https://youtu.be/UgfwGXkFl7Y)** · [Judge walkthrough](#judge-walkthrough-5-minutes)
+**[▶ Open the live demo](https://peakshift-seven.vercel.app/demo)** · **[Watch the demo video](https://youtu.be/UgfwGXkFl7Y)** · [Devpost project](https://devpost.com/software/peakshift-wp8syx) · [Judge walkthrough](#judge-walkthrough-5-minutes)
 
 [![PeakShift demo video on YouTube](docs/devpost/youtube-thumbnail.png)](https://youtu.be/UgfwGXkFl7Y)
 

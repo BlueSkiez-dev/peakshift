@@ -8,6 +8,7 @@
 - Live demo: https://peakshift-seven.vercel.app (start at `/demo`)
 - Code: https://github.com/BlueSkiez-dev/peakshift
 - Video: https://youtu.be/UgfwGXkFl7Y
+- Devpost: https://devpost.com/software/peakshift-wp8syx
 
 **Built with:** PayPal Orders v2 (Checkout), PayPal Payouts, PayPal Webhooks (signature verification), Claude (Anthropic API), AG Grid, AG Charts, AG Studio (Agent Framework), Next.js, React, TypeScript, Tailwind CSS, PostgreSQL (Supabase), Vercel
 
