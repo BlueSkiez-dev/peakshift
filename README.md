@@ -6,7 +6,11 @@ PeakShift helps an energy programme operator turn small-business electricity fle
 
 > **AI interprets. Deterministic code allocates and verifies. Humans approve. PayPal moves the money (sandbox).**
 
-**[▶ Open the live demo](https://peakshift-seven.vercel.app/demo)** · **[Watch the 3-minute video](https://youtu.be/UgfwGXkFl7Y)** · [Judge walkthrough](#judge-walkthrough-5-minutes)
+Built for the **PayPal AI Hackathon** with PayPal Checkout, Payouts and Webhooks, Claude, and AG Grid / AG Charts / AG Studio.
+
+**[▶ Open the live demo](https://peakshift-seven.vercel.app/demo)** · **[Watch the demo video](https://youtu.be/UgfwGXkFl7Y)** · [Judge walkthrough](#judge-walkthrough-5-minutes)
+
+[![PeakShift demo video on YouTube](docs/devpost/youtube-thumbnail.png)](https://youtu.be/UgfwGXkFl7Y)
 
 ## Product screenshots
 
@@ -22,12 +26,12 @@ PeakShift helps an energy programme operator turn small-business electricity fle
 
 No PeakShift account or installation required. Explore the application immediately using demo accounts. Completing the PayPal Checkout flow requires a PayPal sandbox Personal buyer account, provided in the Devpost testing instructions.
 
-1. Open **https://peakshift-seven.vercel.app/demo** and click **Open operator workspace**. Every PeakShift account is a one-click role switch (demo-only and audited).
+1. Open **https://peakshift-seven.vercel.app/demo** and click **Open operator workspace**. Demo accounts are one click, with no passwords. Business views open in their own tabs, so the operator tab stays signed in.
 2. **Check the event state first.** The demo is shared between reviewers. If the Wednesday peak event is already complete, click **Start a fresh run** on the Overview to restore it to *Awaiting funding*. Prefer just to look around? Leave it: a completed run shows every screen fully populated.
 3. **Fund the $12.00 budget** with real PayPal sandbox Checkout, signing in with the sandbox Personal buyer account from the Devpost testing instructions (or any sandbox Personal account of your own). The app's own seller account cannot pay itself.
 4. Follow the [judge walkthrough](#judge-walkthrough-5-minutes). Every other step — plan, offers, verification, settlement, real sandbox Payouts and signed webhooks — runs in the app with no further credentials.
 
-**Video:** [Watch the 3-minute product demonstration](https://youtu.be/UgfwGXkFl7Y). The video shows the full experience; the walkthrough below is the detailed, hands-on guide for inspecting the implementation.
+**Video:** [Watch the product demonstration](https://youtu.be/UgfwGXkFl7Y). The video shows the full experience; the walkthrough below is the detailed, hands-on guide for inspecting the implementation.
 
 ## The problem and how PeakShift works
 
@@ -83,11 +87,11 @@ Nothing here claims a real grid outcome. Every energy screen carries a *Simulate
 8. **Energy Intelligence** (`/operator/intelligence`): the *Event Performance* report opens in View mode. Click a business in **Participant Contribution** and Load Shift Evidence and Settlement Pulse re-scope through the data-model relationships; **Clear filters** restores the view. Click **Ask PeakShift Analyst**, then ask *"Build a chart comparing committed versus verified shifted energy by business for this event"* and *"Why was NorthCool Storage excluded from this dispatch?"*. Try *"Send the payouts now"* to see the refusal.
 9. **Review rewards and settlement** → **Approve and send payouts** → **Confirm payout submission**.
 10. **Payments**: batch vs item status tracked separately, item history, signature-verified webhook receipts (rejected ones grouped separately), the redacted PayPal response and a ledger CSV.
-11. Switch to the business view → **Earnings** shows the verified reward and PayPal reference — and only that business's data.
+11. In a business tab (or a business tile on `/demo`), open **Earnings**: it shows the verified reward and PayPal reference — and only that business's data.
 
 **Fresh run:** Overview → **Start a fresh run** (operator, audited). It resets a completed or unfunded event immediately, but refuses while another reviewer’s run is in progress until it has been idle for 10 minutes. The platform admin can still reset unconditionally from Settings.
 
-### Demo accounts (role switch on `/demo`, demo-only and audited)
+### Demo accounts (one click on `/demo`, demo-only)
 
 | Account | Role |
 |---|---|
@@ -162,7 +166,7 @@ npm test                     # 36 tests: domain, Energy Intelligence, chronology
 npm run lint                 # ESLint (next/core-web-vitals + typescript)
 ```
 
-With no keys at all, the app runs end to end using the labelled PayPal simulator and the offline AI rules. State lives in `./.data/state.json` (atomic writes); delete it, or use the admin reset, to restore the seed.
+With no keys at all, the app runs end to end using the labelled PayPal simulator and the offline AI rules. State lives in `./.data/state.json` (atomic writes). To restore the seed, click **Start a fresh run** on the Overview, use the admin reset in Settings, or delete the file.
 
 **PayPal sandbox setup**
 1. In the PayPal Developer Dashboard, create a sandbox REST app and enable **Payouts**. Put its credentials in `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET`.
@@ -202,7 +206,7 @@ Business IDs: `org_cleartank`, `org_freshfold`, `org_riverside`, `org_harbour`, 
 
 1. **Database.** Create a Postgres database (Supabase works well). In Supabase, open **Connect → Transaction pooler** and copy the URI (port `6543`). Optionally apply `supabase/migrations/20261105000000_peakshift_store.sql`; the app also creates its two tables on first connection.
 2. **Environment variables** (Vercel → Project → Settings → Environment Variables): `DATABASE_URL`, `SESSION_SECRET`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_SANDBOX_RECIPIENTS`, `ANTHROPIC_API_KEY` and `AG_STUDIO_LICENSE_KEY` (see the table above).
-3. **Deploy:** `npx vercel --prod` from the project folder, or import the GitHub repo in Vercel. `vercel.json` pins functions to the London region and schedules a daily keep-alive (`/api/v1/cron/keepalive`) so a free-tier database never pauses for inactivity.
+3. **Deploy:** run `npx vercel --prod` from the project folder (in Windows PowerShell, use `npx.cmd vercel --prod`), or import the GitHub repo in Vercel. `vercel.json` pins functions to the London region and schedules a daily keep-alive (`/api/v1/cron/keepalive`) so a free-tier database never pauses for inactivity.
 4. **Webhook.** In the PayPal Developer Dashboard, add `https://<your-app>.vercel.app/api/v1/webhooks/paypal`, subscribe to the `PAYMENT.PAYOUTSBATCH.*` and `PAYMENT.PAYOUTS-ITEM.*` events, copy the Webhook ID into `PAYPAL_WEBHOOK_ID` and redeploy.
 
 With `DATABASE_URL` set, state lives in Postgres (`peakshift_state`). Every request loads the latest document and every write is a row-locked transaction, so concurrent serverless instances never overwrite each other.
@@ -211,10 +215,11 @@ With `DATABASE_URL` set, state lives in Postgres (`peakshift_state`). Every requ
 
 ```
 app/
-  demo/                  judge entry + role switch
+  demo/                  judge entry: operator workspace and business tiles
   operator/*             control room (overview, events/[id] stages, network, payments, intelligence, audit, settings)
   business/*             mobile-first participant portal (home, flexibility, offers, earnings, profile)
   api/v1/[...path]       REST API with server-side role and ownership checks
+proxy.ts                 maps tab-scoped /as/<owner>/business/… views to the business portal
 lib/
   optimiser.ts           eligibility gates + lowest-cost allocation + reason codes
   verification.ts        M&V: verified = min(peak reduction, alternate-window increase), capped at commitment
@@ -227,6 +232,8 @@ lib/
   analytics-contract.ts  event-scoped AG Studio data sources + relationships
   efficiency.ts          participantEfficiency projection (paid USD per verified kWh, weighted average)
   status.ts, terms.ts    one shared status and metric vocabulary used by every screen
+  as.ts                  tab-scoped business identity (business users only)
+  demo-reset.ts          Start a fresh run guard: never resets another reviewer's active run
 components/              design system, charts (AG Charts), grids (AG Grid), AG Studio workspace
 tests/                   domain, Energy Intelligence, chronology, reconciliation, unit cost, fresh-run guard (36 tests)
 ```
@@ -237,7 +244,8 @@ Money is integer cents and energy is integer Wh throughout. Rewards are recalcul
 
 - Single peak window and a linear lowest-cost model, not a network-constrained dispatch.
 - The M&V method is a conservative demo heuristic, not a certified methodology.
-- Demo auth is a signed cookie with a role switch; business views opened from the operator console use a tab-scoped `/as/<owner>/business/…` URL (business identities only), so operator and business tabs can be open side by side, and the live demo is shared between reviewers (Start a fresh run is one click on the Overview, guarded so it never wipes another reviewer’s active run).
+- Demo sign-in is a signed cookie, not real authentication. Business views use a tab-scoped `/as/<owner>/business/…` URL (business identities only), so operator and business tabs can be open side by side.
+- The live demo is shared between reviewers. **Start a fresh run** on the Overview resets it in one click, but never while another reviewer’s run is active.
 - State is a single JSONB document in Postgres rather than a normalised schema — enough for one demo organisation; the read/mutate contract allows a later move to relational tables.
 
 ## Licence and acknowledgements
